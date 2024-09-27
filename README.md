@@ -1,62 +1,38 @@
-<hr>
+# zig-build-libuv
 
-**⚠️ Project Archived ⚠️.** This project is archived. I used this for a few
-real projects since 2021 and it was stable, but I've since moved onto using
-[libxev](https://github.com/mitchellh/libxev) so I'm no longer maintaining
-the libuv bindings.
-
-<hr>
-
-# zig-libuv
-
-zig-libuv contains a `build.zig` that can build libuv using Zig and also
-contains a package with Zig bindings. Both can be used together or separately.
-Building libuv with Zig enables easy cross-compilation. The bindings allow
-you to consume libuv easily whether it is built with Zig or not.
-
-## Example 
-
-There are lots of examples in the tests for each individual handle type.
-Below is an example of using a timer, copied exactly from the tests:
-
-```zig
-var loop = try Loop.init(testing.allocator);
-defer loop.deinit(testing.allocator);
-
-var timer = try init(testing.allocator, loop);
-defer timer.deinit(testing.allocator);
-
-var called: bool = false;
-timer.setData(&called);
-try timer.start((struct {
-    fn callback(t: *Timer) void {
-        t.getData(bool).?.* = true;
-        t.close(null);
-    }
-}).callback, 10, 1000);
-
-_ = try loop.run(.default);
-
-try testing.expect(called);
-```
+Build [libuv](https://github.com/libuv/libuv) with easy cross-compilation enabled by [Zig](https://github.com/ziglang/zig)!
 
 ## Usage
 
 To **build libuv:**
 
+Add the dependency:
+
+```sh
+zig fetch --save=zig_build_libuv "git ref url"
+```
+
+A gif ref url can be a commit, tag, release, etc.
+
 ```zig
-const libuv = @import("path/to/zig-libuv/build.zig");
+pub fn build(b: *std.Build) !void {
+    const build_libuv = b.dependency("zig_build_libuv", .{
+        .target = target,
+        .optimize = optimize,
+    });
 
-pub fn build(b: *std.build.Builder) !void {
-    // ...
+    const libuv = build_libuv.artifact("uv");
 
-    const exe = b.addExecutable("my-program", "src/main.zig");
-    _ = libuv.link(b, exe);
+    // exe or lib setup
+
+    exe.linkLibrary(libuv); // or lib.linkLibrary(libuv);
 }
 ```
 
-To **use the Zig bindings**, add the package:
+Import in your zig file:
 
 ```zig
-exe.addPackage(libuv.pkg);
+const uv = @cImport({
+    @cInclude("uv.h");
+});
 ```

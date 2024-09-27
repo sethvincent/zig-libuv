@@ -1,0 +1,15 @@
+.{
+    .name = "zig-build-libuv",
+    .version = "0.0.0",
+    .dependencies = .{
+        .upstream = .{
+            .url = "https://github.com/libuv/libuv/archive/refs/tags/v1.49.0.tar.gz",
+            .hash = "12204deda038d1b53e2aa8eeccb85bf286c33ecc5dd6c25c5b00dfca061eaaaa8649",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
